@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo de Propiedades</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ==================== LOGIN ==================== -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="brand-logo">
+        <i class="ti ti-building-estate"></i>
+      </div>
+      <h2>Catálogo de propiedades</h2>
+      <p class="subtitle">Acceso solo para asesores</p>
+      <input type="password" id="pass-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter') doLogin()" />
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+      <p class="error-msg" id="login-error">Contraseña incorrecta. Intenta de nuevo.</p>
+    </div>
+  </div>
+
+  <!-- ==================== APP ==================== -->
+  <div id="app">
+
+    <!-- Barra superior -->
+    <div class="app-topbar">
+      <div class="topbar-left">
+        <i class="ti ti-building-estate"></i>
+        <span class="topbar-title">Catálogo de propiedades</span>
+        <span class="badge-count" id="total-count">0</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">
+        <i class="ti ti-logout"></i> Salir
+      </button>
+    </div>
+
+    <div class="app-body">
+
+      <!-- Filtros -->
+      <div class="filters-bar">
+        <input type="text" id="f-search" placeholder="Buscar propiedad..." oninput="applyFilters()" />
+        <select id="f-operacion" onchange="applyFilters()">
+          <option value="">Operación</option>
+          <option>Venta</option>
+          <option>Renta</option>
+        </select>
+        <select id="f-tipo" onchange="applyFilters()">
+          <option value="">Tipo</option>
+          <option>Casa</option>
+          <option>Departamento</option>
+          <option>Terreno</option>
+          <option>Local</option>
+          <option>Oficina</option>
+        </select>
+        <select id="f-status" onchange="applyFilters()">
+          <option value="">Status</option>
+          <option>Disponible</option>
+          <option>Apartada</option>
+          <option>Vendida</option>
+          <option>Rentada</option>
+        </select>
+        <select id="f-zona" onchange="applyFilters()">
+          <option value="">Zona</option>
+        </select>
+        <select id="f-exclusiva" onchange="applyFilters()">
+          <option value="">Todas</option>
+          <option value="Exclusiva">Exclusiva</option>
+          <option value="Opcional">Opcional</option>
+        </select>
+      </div>
+
+      <!-- Contador de resultados -->
+      <p class="results-count" id="results-count"></p>
+
+      <!-- Grid de propiedades -->
+      <div class="prop-grid" id="prop-grid"></div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
