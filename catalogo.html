@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catálogo de Propiedades</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+/* LOGIN */
+#login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: #f5f5f5; }
+.login-card { background: white; border-radius: 16px; border: 1px solid #e5e5e5; padding: 2.5rem; width: 100%; max-width: 380px; text-align: center; }
+.brand-logo { width: 56px; height: 56px; background: #234D92; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+.brand-logo i { color: #EAD347; font-size: 28px; }
+.login-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 0.25rem; color: #1a1a1a; }
+.login-card .subtitle { font-size: 14px; color: #888; margin-bottom: 1.75rem; }
+.login-card input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 0.75rem; outline: none; }
+.login-card input:focus { border-color: #234D92; }
+.btn-primary { width: 100%; padding: 11px; background: #234D92; color: #EAD347; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-primary:hover { opacity: 0.9; }
+.error-msg { font-size: 12px; color: #dc2626; margin-top: 0.5rem; display: none; }
+
+/* APP */
+#app { display: none; }
+.app-topbar { background: #234D92; padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-left i { color: #EAD347; font-size: 22px; }
+.topbar-title { color: #EAD347; font-size: 16px; font-weight: 600; }
+.badge-count { background: #EAD347; color: #234D92; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.btn-logout { font-size: 12px; color: rgba(234,211,71,0.8); background: none; border: 1px solid rgba(234,211,71,0.3); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.btn-logout:hover { border-color: #EAD347; color: #EAD347; }
+
+.app-body { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+/* CONFIG */
+.config-section { background: white; border-radius: 12px; border: 1px solid #e5e5e5; padding: 1.25rem; margin-bottom: 1.5rem; }
+.config-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 0.5rem; color: #1a1a1a; }
+.config-section p { font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 0.5rem; }
+.config-section code { font-family: monospace; font-size: 12px; background: #f5f5f5; border: 1px solid #e5e5e5; border-radius: 4px; padding: 2px 6px; }
+.sheet-input-row { display: flex; gap: 8px; margin-top: 0.75rem; }
+.sheet-input-row input { flex: 1; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; outline: none; }
+.sheet-input-row input:focus { border-color: #234D92; }
+.btn-connect { padding: 9px 16px; font-size: 13px; font-weight: 600; background: #234D92; color: #EAD347; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+.btn-connect:hover { opacity: 0.9; }
+
+/* FILTROS */
+.filters-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+.filters-bar input, .filters-bar select { padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; background: white; outline: none; }
+.filters-bar input:focus, .filters-bar select:focus { border-color: #234D92; }
+.results-count { font-size: 12px; color: #888; margin-bottom: 1rem; }
+
+/* GRID */
+.prop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+
+/* CARD */
+.prop-card { background: white; border-radius: 14px; border: 1px solid #e5e5e5; overflow: hidden; transition: box-shadow 0.15s; }
+.prop-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.card-header { background: #234D92; padding: 0.875rem 1rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.prop-name { font-size: 14px; font-weight: 600; color: #EAD347; line-height: 1.3; }
+.prop-address { font-size: 11px; color: rgba(234,211,71,0.65); margin-top: 3px; }
+.status-badge { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.status-disponible { background: #d1fae5; color: #065f46; }
+.status-apartada { background: #fef3c7; color: #92400e; }
+.status-vendida { background: #fee2e2; color: #991b1b; }
+.status-rentada { background: #e0e7ff; color: #3730a3; }
+
+.card-body { padding: 0.875rem 1rem; }
+.prop-precio { font-size: 20px; font-weight: 700; color: #234D92; margin-bottom: 0.5rem; }
+.prop-precio small { font-size: 11px; color: #888; font-weight: 400; margin-left: 4px; }
+.prop-tipo-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; border: 1px solid #e5e5e5; color: #555; background: #f9f9f9; }
+.tag-gold { background: #EAD347; color: #234D92; border-color: #EAD347; font-weight: 600; }
+.tag-blue { background: #234D92; color: #EAD347; border-color: #234D92; font-weight: 600; }
+.tag-iva { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+
+.prop-specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 0.75rem; }
+.spec-item { text-align: center; padding: 8px 4px; background: #f5f7fb; border-radius: 8px; }
+.spec-val { font-size: 15px; font-weight: 700; color: #234D92; display: block; }
+.spec-lbl { font-size: 10px; color: #888; }
+
+.extra-specs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
+.card-links { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.875rem; }
+.link-btn { font-size: 11px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 8px; color: #555; background: white; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: background 0.1s; }
+.link-btn:hover { background: #f5f5f5; border-color: #bbb; }
+.link-btn i { font-size: 13px; }
+
+.copy-section { border-top: 1px solid #f0f0f0; padding-top: 0.875rem; }
+.copy-label { font-size: 11px; color: #888; margin-bottom: 5px; display: flex; align-items: center; gap: 4px; }
+.copy-text { font-size: 12px; color: #333; background: #f9f9f9; border-radius: 8px; padding: 9px 11px; line-height: 1.55; max-height: 90px; overflow-y: auto; white-space: pre-wrap; margin-bottom: 8px; border: 1px solid #f0f0f0; }
+.card-actions { display: flex; gap: 6px; }
+.btn-copy { flex: 1; padding: 9px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; cursor: pointer; color: #333; display: flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.1s; }
+.btn-copy:hover { background: #ebebeb; }
+.btn-wa { flex: 1; padding: 9px; background: #25D366; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.btn-wa:hover { background: #1ebe5d; }
+.wa-input-row { display: flex; gap: 6px; margin-top: 8px; }
+.wa-input-row input { flex: 1; font-size: 12px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+.wa-input-row input:focus { border-color: #25D366; }
+.wa-send { padding: 8px 12px; background: #25D366; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.wa-send:hover { background: #1ebe5d; }
+
+.empty-state { text-align: center; padding: 4rem 1rem; color: #aaa; font-size: 14px; grid-column: 1/-1; }
+.empty-state i { font-size: 40px; display: block; margin-bottom: 10px; color: #ccc; }
+.loading-msg { text-align: center; padding: 3rem; color: #888; font-size: 14px; grid-column: 1/-1; }
+
+@media (max-width: 600px) {
+  .app-body { padding: 1rem; }
+  .prop-grid { grid-template-columns: 1fr; }
+  .filters-bar { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="brand-logo"><i class="ti ti-building-estate"></i></div>
+    <h2>Catálogo de propiedades</h2>
+    <p class="subtitle">Acceso solo para asesores</p>
+    <input type="password" id="pass-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    <p class="error-msg" id="login-error">Contraseña incorrecta. Intenta de nuevo.</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="app-topbar">
+    <div class="topbar-left">
+      <i class="ti ti-building-estate"></i>
+      <span class="topbar-title">Catálogo de propiedades</span>
+      <span class="badge-count" id="total-count">0</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Salir</button>
+  </div>
+
+  <div class="app-body">
+    <div class="config-section" id="config-panel">
+      <h3><i class="ti ti-table" style="font-size:15px;vertical-align:-2px;margin-right:6px;"></i>Conectar Google Sheets</h3>
+      <p>Pega el ID de tu Google Sheet. La hoja debe estar compartida como "cualquier persona con el link puede ver". El nombre de la pestaña debe ser <code>Propiedades</code>.</p>
+      <p>El ID está en la URL entre <code>/d/</code> y <code>/edit</code>.</p>
+      <div class="sheet-input-row">
+        <input type="text" id="sheet-id-input" placeholder="ID del Google Sheet" />
+        <button class="btn-connect" onclick="loadSheet()"><i class="ti ti-plug"></i> Conectar</button>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <input type="text" id="f-search" placeholder="Buscar propiedad..." oninput="applyFilters()" />
+      <select id="f-operacion" onchange="applyFilters()">
+        <option value="">Operación</option>
+        <option>Venta</option>
+        <option>Renta</option>
+      </select>
+      <select id="f-tipo" onchange="applyFilters()">
+        <option value="">Tipo</option>
+        <option>Casa</option>
+        <option>Departamento</option>
+        <option>Terreno</option>
+        <option>Local</option>
+        <option>Oficina</option>
+      </select>
+      <select id="f-status" onchange="applyFilters()">
+        <option value="">Status</option>
+        <option>Disponible</option>
+        <option>Apartada</option>
+        <option>Vendida</option>
+        <option>Rentada</option>
+      </select>
+      <select id="f-zona" onchange="applyFilters()">
+        <option value="">Zona</option>
+      </select>
+      <select id="f-exclusiva" onchange="applyFilters()">
+        <option value="">Todas</option>
+        <option value="Exclusiva">Exclusiva</option>
+        <option value="Opcional">Opcional</option>
+      </select>
+    </div>
+
+    <p class="results-count" id="results-count"></p>
+    <div class="prop-grid" id="prop-grid"></div>
+  </div>
+</div>
+
+<script>
+const PASSWORD = "catalogo2026";
+const SHEET_ID = "1-Ss8zsvZC0JlOSWms-TRrbFkWv1ZH5ZvqJhhXcBLkQo";
+let allProps = [];
+
+function doLogin() {
+  const val = document.getElementById('pass-input').value;
+  if (val === PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('sheet-id-input').value = SHEET_ID;
+    loadSheet();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pass-input').value = '';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+async function loadSheet() {
+  const id = (document.getElementById('sheet-id-input').value || SHEET_ID).trim();
+  if (!id) return;
+  const grid = document.getElementById('prop-grid');
+  grid.innerHTML = '<div class="loading-msg"><i class="ti ti-loader"></i> Cargando propiedades...</div>';
+  const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=Propiedades`;
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}') + 1;
+    const json = JSON.parse(text.substring(start, end));
+    const cols = json.table.cols.map(c => (c.label || '').toLowerCase().trim().replace(/ /g, '_'));
+    allProps = json.table.rows
+      .filter(row => row && row.c && row.c.some(cell => cell && cell.v !== null && cell.v !== ''))
+      .map(row => {
+        const obj = {};
+        cols.forEach((col, i) => {
+          obj[col] = row.c[i] ? (row.c[i].v !== null && row.c[i].v !== undefined ? String(row.c[i].v) : '') : '';
+        });
+        return obj;
+      });
+    document.getElementById('config-panel').style.display = 'none';
+    populateZonas();
+    applyFilters();
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i>No se pudo conectar al Sheet.<br>Verifica que sea público y el nombre de la pestaña sea <strong>Propiedades</strong>.</div>';
+  }
+}
+
+function populateZonas() {
+  const zonas = [...new Set(allProps.map(p => p.zona).filter(Boolean))].sort();
+  const sel = document.getElementById('f-zona');
+  sel.innerHTML = '<option value="">Zona</option>';
+  zonas.forEach(z => {
+    const o = document.createElement('option');
+    o.value = z; o.textContent = z;
+    sel.appendChild(o);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById('f-search').value.toLowerCase();
+  const op = document.getElementById('f-operacion').value;
+  const tipo = document.getElementById('f-tipo').value;
+  const status = document.getElementById('f-status').value;
+  const zona = document.getElementById('f-zona').value;
+  const excl = document.getElementById('f-exclusiva').value;
+  const filtered = allProps.filter(p => {
+    if (search && !JSON.stringify(p).toLowerCase().includes(search)) return false;
+    if (op && p.operacion !== op) return false;
+    if (tipo && p.tipo !== tipo) return false;
+    if (status && p.status !== status) return false;
+    if (zona && p.zona !== zona) return false;
+    if (excl && p.exclusiva !== excl) return false;
+    return true;
+  });
+  document.getElementById('total-count').textContent = allProps.length;
+  document.getElementById('results-count').textContent = `Mostrando ${filtered.length} de ${allProps.length} propiedades`;
+  renderGrid(filtered);
+}
+
+function statusClass(s) {
+  const m = { 'Disponible': 'disponible', 'Apartada': 'apartada', 'Vendida': 'vendida', 'Rentada': 'rentada' };
+  return m[s] || 'disponible';
+}
+
+function cardHTML(p, idx) {
+  const precio = p.operacion === 'Renta' ? p.precio_renta : p.precio_venta;
+  const specs = [
+    p.recamaras ? `<div class="spec-item"><span class="spec-val">${p.recamaras}</span><span class="spec-lbl">recámaras</span></div>` : '',
+    p.banos ? `<div class="spec-item"><span class="spec-val">${p.banos}</span><span class="spec-lbl">baños</span></div>` : '',
+    p.m2 ? `<div class="spec-item"><span class="spec-val">${p.m2}</span><span class="spec-lbl">m²</span></div>` : '',
+  ].filter(Boolean).join('');
+  const extras = [
+    p.zona ? `<span class="tag"><i class="ti ti-map-2"></i> ${p.zona}</span>` : '',
+    p.nivel ? `<span class="tag">Nivel ${p.nivel}</span>` : '',
+    p.estacionamiento ? `<span class="tag"><i class="ti ti-car"></i> ${p.estacionamiento} cajón${p.estacionamiento != '1' ? 'es' : ''}</span>` : '',
+    p.amueblado && p.amueblado !== 'N/A' ? `<span class="tag">${p.amueblado === 'Sí' ? 'Amueblado' : 'Sin amueblar'}</span>` : '',
+    p.mant_costo ? `<span class="tag">Mant. ${p.mant_costo}</span>` : '',
+    p.mant_incluido === 'Sí' ? `<span class="tag" style="color:#065f46;background:#d1fae5;border-color:#a7f3d0;">Mant. incluido</span>` : '',
+    p.iva === 'Sí' ? `<span class="tag tag-iva">+ IVA</span>` : '',
+  ].filter(Boolean).join('');
+  const links = [
+    p.maps ? `<a class="link-btn" href="${p.maps}" target="_blank"><i class="ti ti-map-pin"></i> Maps</a>` : '',
+    p.web ? `<a class="link-btn" href="${p.web}" target="_blank"><i class="ti ti-world"></i> Sitio</a>` : '',
+    p.easybroker ? `<a class="link-btn" href="${p.easybroker}" target="_blank"><i class="ti ti-home-search"></i> EasyBroker</a>` : '',
+    p.fotos_drive ? `<a class="link-btn" href="${p.fotos_drive}" target="_blank"><i class="ti ti-photo"></i> Fotos</a>` : '',
+    p.ficha_tecnica ? `<a class="link-btn" href="${p.ficha_tecnica}" target="_blank"><i class="ti ti-file-description"></i> Ficha</a>` : '',
+    p.video ? `<a class="link-btn" href="${p.video}" target="_blank"><i class="ti ti-player-play"></i> Video</a>` : '',
+  ].filter(Boolean).join('');
+  const copyEscaped = (p.copy || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+  const waMsg = encodeURIComponent(p.copy || '');
+  return `
+    <div class="prop-card">
+      <div class="card-header">
+        <div style="flex:1;">
+          <div class="prop-name">${p.nombre || 'Sin nombre'}</div>
+          <div class="prop-address">${p.direccion || ''}</div>
+        </div>
+        <span class="status-badge status-${statusClass(p.status)}">${p.status || ''}</span>
+      </div>
+      <div class="card-body">
+        <div class="prop-precio">${precio || '—'}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</div>
+        <div class="prop-tipo-row">
+          <span class="tag tag-blue">${p.operacion || ''}</span>
+          <span class="tag">${p.tipo || ''}</span>
+          ${p.exclusiva === 'Exclusiva' ? '<span class="tag tag-gold">Exclusiva</span>' : '<span class="tag">Opcional</span>'}
+        </div>
+        ${specs ? `<div class="prop-specs">${specs}</div>` : ''}
+        ${extras ? `<div class="extra-specs">${extras}</div>` : ''}
+        ${links ? `<div class="card-links">${links}</div>` : ''}
+        <div class="copy-section">
+          <div class="copy-label"><i class="ti ti-message" style="font-size:13px;"></i> Copy listo para enviar</div>
+          <div class="copy-text">${(p.copy || 'Sin copy').replace(/\n/g, '<br>')}</div>
+          <div class="card-actions">
+            <button class="btn-copy" onclick="copyCopy('${copyEscaped}', this)"><i class="ti ti-copy"></i> Copiar</button>
+            <button class="btn-wa" onclick="toggleWaInput(${idx})"><i class="ti ti-brand-whatsapp"></i> Enviar</button>
+          </div>
+          <div class="wa-input-row" id="wa-row-${idx}" style="display:none;">
+            <input type="tel" id="wa-num-${idx}" placeholder="Número del cliente (ej. 526691234567)" />
+            <button class="wa-send" onclick="sendWhatsApp(${idx}, '${waMsg}')"><i class="ti ti-send"></i> Abrir</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGrid(props) {
+  const grid = document.getElementById('prop-grid');
+  if (props.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><i class="ti ti-building-off"></i>No hay propiedades con esos filtros</div>';
+    return;
+  }
+  grid.innerHTML = props.map((p, i) => cardHTML(p, i)).join('');
+}
+
+function toggleWaInput(idx) {
+  const row = document.getElementById(`wa-row-${idx}`);
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+  if (row.style.display === 'flex') document.getElementById(`wa-num-${idx}`).focus();
+}
+
+function sendWhatsApp(idx, msg) {
+  const num = document.getElementById(`wa-num-${idx}`).value.replace(/\D/g, '');
+  if (!num || num.length < 10) { alert('Escribe un número válido con lada. Ej: 526691234567'); return; }
+  window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+}
+
+function copyCopy(text, btn) {
+  const clean = text.replace(/\\n/g, '\n');
+  navigator.clipboard.writeText(clean).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check"></i> Copiado';
+    btn.style.color = '#065f46';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 2000);
+  });
+}
+</script>
+</body>
+</html>
