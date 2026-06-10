@@ -4,6 +4,8 @@ let allProps = [];
 
 async function doLogin() {
 
+  document.getElementById('login-error').style.display = 'none';
+
   const val =
     document.getElementById('pass-input').value;
 
@@ -147,12 +149,12 @@ function cardHTML(p, idx) {
     p.iva === 'Sí' ? `<span class="tag tag-iva">+ IVA</span>` : '',
   ].filter(Boolean).join('');
   const links = [
-    p.maps ? `<a class="link-btn" href="${p.maps}" target="_blank"><i class="ti ti-map-pin"></i> Maps</a>` : '',
-    p.web ? `<a class="link-btn" href="${p.web}" target="_blank"><i class="ti ti-world"></i> Sitio</a>` : '',
-    p.easybroker ? `<a class="link-btn" href="${p.easybroker}" target="_blank"><i class="ti ti-home-search"></i> EasyBroker</a>` : '',
-    p.fotos_drive ? `<a class="link-btn" href="${p.fotos_drive}" target="_blank"><i class="ti ti-photo"></i> Fotos</a>` : '',
-    p.ficha_tecnica ? `<a class="link-btn" href="${p.ficha_tecnica}" target="_blank"><i class="ti ti-file-description"></i> Ficha</a>` : '',
-    p.video ? `<a class="link-btn" href="${p.video}" target="_blank"><i class="ti ti-player-play"></i> Video</a>` : '',
+    p.maps ? `<a class="link-btn" href="${p.maps}"target="_blank" rel="noopener noreferrer""><i class="ti ti-map-pin"></i> Maps</a>` : '',
+    p.web ? `<a class="link-btn" href="${p.web}"target="_blank" rel="noopener noreferrer""><i class="ti ti-world"></i> Sitio</a>` : '',
+    p.easybroker ? `<a class="link-btn" href="${p.easybroker}"target="_blank" rel="noopener noreferrer""><i class="ti ti-home-search"></i> EasyBroker</a>` : '',
+    p.fotos_drive ? `<a class="link-btn" href="${p.fotos_drive}"target="_blank" rel="noopener noreferrer""><i class="ti ti-photo"></i> Fotos</a>` : '',
+    p.ficha_tecnica ? `<a class="link-btn" href="${p.ficha_tecnica}"target="_blank" rel="noopener noreferrer""><i class="ti ti-file-description"></i> Ficha</a>` : '',
+    p.video ? `<a class="link-btn" href="${p.video}"target="_blank" rel="noopener noreferrer""><i class="ti ti-player-play"></i> Video</a>` : '',
   ].filter(Boolean).join('');
   const copyEscaped = (p.copy || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
   const waMsg = encodeURIComponent(p.copy || '');
