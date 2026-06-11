@@ -11,9 +11,15 @@ async function doLogin() {
 
   try {
 
-    const res = await fetch(
-      `${API_URL}?password=${encodeURIComponent(val)}`
-    );
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        password: val
+      })
+    });
 
     const json = await res.json();
 
@@ -23,8 +29,8 @@ async function doLogin() {
       return;
     }
 
-    localStorage.setItem("logged","true");
-    localStorage.setItem("catalog_pass", val);
+    sessionStorage.setItem("logged","true");
+    sessionStorage.setItem("catalog_pass", val);
 
     document.getElementById('login-screen').style.display =
       'none';
@@ -46,8 +52,8 @@ async function doLogin() {
 
 function doLogout() {
 
-  localStorage.removeItem("logged");
-  localStorage.removeItem("catalog_pass");
+  sessionStorage.removeItem("logged");
+  sessionStorage.removeItem("catalog_pass");
 
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
@@ -57,7 +63,7 @@ function doLogout() {
 
 async function loadSheet() {
 
-  const pass = localStorage.getItem("catalog_pass");
+  const pass = sessionStorage.getItem("catalog_pass");
 
   if (!pass) {
     doLogout();
@@ -71,9 +77,15 @@ async function loadSheet() {
 
   try {
 
-    const res = await fetch(
-      `${API_URL}?password=${encodeURIComponent(pass)}`
-    );
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        password: pass
+      })
+    });
 
     const json = await res.json();
 
@@ -239,8 +251,8 @@ function copyCopy(text, btn) {
 window.addEventListener('load', () => {
 
   if (
-    localStorage.getItem('logged') === 'true' &&
-    localStorage.getItem('catalog_pass')
+    sessionStorage.getItem('logged') === 'true' &&
+    sessionStorage.getItem('catalog_pass')
   ) {
 
     document.getElementById('login-screen').style.display = 'none';
