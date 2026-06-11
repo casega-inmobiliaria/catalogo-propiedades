@@ -127,6 +127,18 @@ function applyFilters() {
   renderGrid(filtered);
 }
 
+function clearFilters() {
+
+  document.getElementById('f-search').value = '';
+  document.getElementById('f-operacion').value = '';
+  document.getElementById('f-tipo').value = '';
+  document.getElementById('f-status').value = '';
+  document.getElementById('f-zona').value = '';
+  document.getElementById('f-exclusiva').value = '';
+
+  applyFilters();
+}
+
 function statusClass(s) {
   const m = { 'Disponible': 'disponible', 'Apartada': 'apartada', 'Vendida': 'vendida', 'Rentada': 'rentada' };
   return m[s] || 'disponible';
