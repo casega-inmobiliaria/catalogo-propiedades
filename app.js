@@ -16,7 +16,7 @@ async function doLogin() {
 
     const res = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ usuario, password })  // ✅ sin headers
+      body: JSON.stringify({ usuario, password })
     });
 
     const json = await res.json();
@@ -34,7 +34,7 @@ async function doLogin() {
 
     sessionStorage.setItem("logged", "true");
     sessionStorage.setItem("user", usuario);
-    sessionStorage.setItem("pass", password);
+    sessionStorage.setItem("pass", password)
 
     document.getElementById('login-screen').style.display =
       'none';
@@ -209,40 +209,5 @@ function copyCopy(text, btn) {
   });
 }
 
-window.addEventListener('load', async () => {
-
-  if (
-    sessionStorage.getItem('logged') === 'true' &&
-    sessionStorage.getItem('user')
-  ) {
-    const usuario = sessionStorage.getItem('user');
-    // Necesitas guardar también la password en sessionStorage al hacer login
-    const password = sessionStorage.getItem('pass');
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, password })
-      });
-
-      const json = await res.json();
-
-      if (!json.success) {
-        // Sesión inválida, forzar logout
-        sessionStorage.clear();
-        return;
-      }
-
-      allProps = json.data;
-      populateZonas();
-      applyFilters();
-
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-
-    } catch(err) {
-      sessionStorage.clear();
-    }
-  }
+window.addEventListener('load', () => {
 });
