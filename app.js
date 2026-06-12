@@ -16,13 +16,7 @@ async function doLogin() {
 
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        usuario,
-        password
-      })
+      body: JSON.stringify({ usuario, password })  // ✅ sin headers
     });
 
     const json = await res.json();
