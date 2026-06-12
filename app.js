@@ -1,5 +1,5 @@
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyFmKsAkXFO8LHnvN6tqz0sIdO3erbTUiH8dQbI0_r04Zr3TfZxNJVOBCANyrIj-EsiqA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwAMiqvgRr_OoT7J_mHN8zhp8uyBHt8pe5rVAFW5SYcCHfg_ANheRsENJPLY0ACno6exw/exec";
 let allProps = [];
 
 async function doLogin() {
@@ -40,6 +40,7 @@ async function doLogin() {
 
     sessionStorage.setItem("logged", "true");
     sessionStorage.setItem("user", usuario);
+    sessionStorage.setItem("pass", password);
 
     document.getElementById('login-screen').style.display =
       'none';
@@ -214,19 +215,40 @@ function copyCopy(text, btn) {
   });
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
 
   if (
     sessionStorage.getItem('logged') === 'true' &&
     sessionStorage.getItem('user')
   ) {
+    const usuario = sessionStorage.getItem('user');
+    // Necesitas guardar también la password en sessionStorage al hacer login
+    const password = sessionStorage.getItem('pass');
 
-    document.getElementById('login-screen').style.display =
-      'none';
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario, password })
+      });
 
-    document.getElementById('app').style.display =
-      'block';
+      const json = await res.json();
 
+      if (!json.success) {
+        // Sesión inválida, forzar logout
+        sessionStorage.clear();
+        return;
+      }
+
+      allProps = json.data;
+      populateZonas();
+      applyFilters();
+
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+    } catch(err) {
+      sessionStorage.clear();
+    }
   }
-
 });
