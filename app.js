@@ -1,4 +1,3 @@
-
 const API_URL = "https://script.google.com/macros/s/AKfycbwAMiqvgRr_OoT7J_mHN8zhp8uyBHt8pe5rVAFW5SYcCHfg_ANheRsENJPLY0ACno6exw/exec";
 let allProps = [];
 
@@ -34,7 +33,7 @@ async function doLogin() {
 
     sessionStorage.setItem("logged", "true");
     sessionStorage.setItem("user", usuario);
-    sessionStorage.setItem("pass", password)
+    // ✅ Ya no guardamos la password por seguridad
 
     document.getElementById('login-screen').style.display =
       'none';
@@ -53,6 +52,7 @@ async function doLogin() {
 
   }
 }
+
 function doLogout() {
 
   sessionStorage.clear();
@@ -79,13 +79,55 @@ function populateZonas() {
   });
 }
 
+// ✅ NUEVO: actualiza los rangos de precio según operación seleccionada
+function updateRangosPrecios() {
+  const op = document.getElementById('f-operacion').value;
+  const sel = document.getElementById('f-precio');
+  const valorActual = sel.value;
+
+  const rangosVenta = [
+    { label: 'Menos de $1M',  value: '0-1000000' },
+    { label: '$1M – $3M',     value: '1000000-3000000' },
+    { label: '$3M – $6M',     value: '3000000-6000000' },
+    { label: '$6M – $10M',    value: '6000000-10000000' },
+    { label: 'Más de $10M',   value: '10000000-99999999' },
+  ];
+
+  const rangosRenta = [
+    { label: 'Menos de $10K', value: '0-10000' },
+    { label: '$10K – $20K',   value: '10000-20000' },
+    { label: '$20K – $40K',   value: '20000-40000' },
+    { label: 'Más de $40K',   value: '40000-99999999' },
+  ];
+
+  const rangos = op === 'Renta' ? rangosRenta : rangosVenta;
+
+  sel.innerHTML = '<option value="">Precio</option>';
+  rangos.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.value;
+    o.textContent = r.label;
+    sel.appendChild(o);
+  });
+
+  // Restaura selección si sigue siendo válida
+  if ([...sel.options].some(o => o.value === valorActual)) {
+    sel.value = valorActual;
+  }
+}
+
 function applyFilters() {
+  // ✅ Actualiza rangos de precio antes de filtrar
+  updateRangosPrecios();
+
   const search = document.getElementById('f-search').value.toLowerCase();
   const op = document.getElementById('f-operacion').value;
   const tipo = document.getElementById('f-tipo').value;
   const status = document.getElementById('f-status').value;
   const zona = document.getElementById('f-zona').value;
   const excl = document.getElementById('f-exclusiva').value;
+  const precioRango = document.getElementById('f-precio').value; // ✅ NUEVO
+
   const filtered = allProps.filter(p => {
     if (search && !JSON.stringify(p).toLowerCase().includes(search)) return false;
     if (op && p.operacion !== op) return false;
@@ -93,8 +135,18 @@ function applyFilters() {
     if (status && p.status !== status) return false;
     if (zona && p.zona !== zona) return false;
     if (excl && p.exclusiva !== excl) return false;
+
+    // ✅ NUEVO: filtro de precio
+    if (precioRango) {
+      const [min, max] = precioRango.split('-').map(Number);
+      const valorPrecio = p.operacion === 'Renta' ? p.precio_renta : p.precio_venta;
+      const numPrecio = parseFloat(String(valorPrecio).replace(/[^0-9.]/g, ''));
+      if (isNaN(numPrecio) || numPrecio < min || numPrecio > max) return false;
+    }
+
     return true;
   });
+
   document.getElementById('total-count').textContent = allProps.length;
   document.getElementById('results-count').textContent = `Mostrando ${filtered.length} de ${allProps.length} propiedades`;
   renderGrid(filtered);
@@ -108,6 +160,7 @@ function clearFilters() {
   document.getElementById('f-status').value = '';
   document.getElementById('f-zona').value = '';
   document.getElementById('f-exclusiva').value = '';
+  document.getElementById('f-precio').value = ''; // ✅ NUEVO
 
   applyFilters();
 }
@@ -117,11 +170,11 @@ function statusClass(s) {
   return m[s] || 'disponible';
 }
 
+// ✅ Formatea precio con comas y decimales
 function formatPrecio(valor) {
   if (!valor) return '—';
-  // Limpia cualquier símbolo y convierte a número
   const num = parseFloat(String(valor).replace(/[^0-9.]/g, ''));
-  if (isNaN(num)) return valor; // Si no es número, regresa tal cual
+  if (isNaN(num)) return valor;
   return '$' + num.toLocaleString('es-MX', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -129,12 +182,16 @@ function formatPrecio(valor) {
 }
 
 function cardHTML(p, idx) {
-  const precio = p.operacion === 'Renta' ? formatPrecio(p.precio_renta) : formatPrecio(p.precio_venta);
+  const precio = p.operacion === 'Renta'
+    ? formatPrecio(p.precio_renta)
+    : formatPrecio(p.precio_venta);
+
   const specs = [
     p.recamaras ? `<div class="spec-item"><span class="spec-val">${p.recamaras}</span><span class="spec-lbl">recámaras</span></div>` : '',
     p.banos ? `<div class="spec-item"><span class="spec-val">${p.banos}</span><span class="spec-lbl">baños</span></div>` : '',
     p.m2 ? `<div class="spec-item"><span class="spec-val">${p.m2}</span><span class="spec-lbl">m²</span></div>` : '',
   ].filter(Boolean).join('');
+
   const extras = [
     p.zona ? `<span class="tag"><i class="ti ti-map-2"></i> ${p.zona}</span>` : '',
     p.nivel ? `<span class="tag">Nivel ${p.nivel}</span>` : '',
@@ -144,16 +201,19 @@ function cardHTML(p, idx) {
     p.mant_incluido === 'Sí' ? `<span class="tag" style="color:#065f46;background:#d1fae5;border-color:#a7f3d0;">Mant. incluido</span>` : '',
     p.iva === 'Sí' ? `<span class="tag tag-iva">+ IVA</span>` : '',
   ].filter(Boolean).join('');
+
   const links = [
-    p.maps ? `<a class="link-btn" href="${p.maps}"target="_blank" rel="noopener noreferrer""><i class="ti ti-map-pin"></i> Maps</a>` : '',
-    p.web ? `<a class="link-btn" href="${p.web}"target="_blank" rel="noopener noreferrer""><i class="ti ti-world"></i> Sitio</a>` : '',
-    p.easybroker ? `<a class="link-btn" href="${p.easybroker}"target="_blank" rel="noopener noreferrer""><i class="ti ti-home-search"></i> EasyBroker</a>` : '',
-    p.fotos_drive ? `<a class="link-btn" href="${p.fotos_drive}"target="_blank" rel="noopener noreferrer""><i class="ti ti-photo"></i> Fotos</a>` : '',
-    p.ficha_tecnica ? `<a class="link-btn" href="${p.ficha_tecnica}"target="_blank" rel="noopener noreferrer""><i class="ti ti-file-description"></i> Ficha</a>` : '',
-    p.video ? `<a class="link-btn" href="${p.video}"target="_blank" rel="noopener noreferrer""><i class="ti ti-player-play"></i> Video</a>` : '',
+    p.maps ? `<a class="link-btn" href="${p.maps}" target="_blank" rel="noopener noreferrer"><i class="ti ti-map-pin"></i> Maps</a>` : '',
+    p.web ? `<a class="link-btn" href="${p.web}" target="_blank" rel="noopener noreferrer"><i class="ti ti-world"></i> Sitio</a>` : '',
+    p.easybroker ? `<a class="link-btn" href="${p.easybroker}" target="_blank" rel="noopener noreferrer"><i class="ti ti-home-search"></i> EasyBroker</a>` : '',
+    p.fotos_drive ? `<a class="link-btn" href="${p.fotos_drive}" target="_blank" rel="noopener noreferrer"><i class="ti ti-photo"></i> Fotos</a>` : '',
+    p.ficha_tecnica ? `<a class="link-btn" href="${p.ficha_tecnica}" target="_blank" rel="noopener noreferrer"><i class="ti ti-file-description"></i> Ficha</a>` : '',
+    p.video ? `<a class="link-btn" href="${p.video}" target="_blank" rel="noopener noreferrer"><i class="ti ti-player-play"></i> Video</a>` : '',
   ].filter(Boolean).join('');
+
   const copyEscaped = (p.copy || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
   const waMsg = encodeURIComponent(p.copy || '');
+
   return `
     <div class="prop-card">
       <div class="card-header">
@@ -164,7 +224,7 @@ function cardHTML(p, idx) {
         <span class="status-badge status-${statusClass(p.status)}">${p.status || ''}</span>
       </div>
       <div class="card-body">
-        <div class="prop-precio">${precio || '—'}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</div>
+        <div class="prop-precio">${precio}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</div>
         <div class="prop-tipo-row">
           <span class="tag tag-blue">${p.operacion || ''}</span>
           <span class="tag">${p.tipo || ''}</span>
@@ -188,9 +248,6 @@ function cardHTML(p, idx) {
       </div>
     </div>`;
 }
-
-
-
 
 function renderGrid(props) {
   const grid = document.getElementById('prop-grid');
@@ -224,4 +281,5 @@ function copyCopy(text, btn) {
 }
 
 window.addEventListener('load', () => {
+  // Sin restauración automática de sesión por seguridad
 });
