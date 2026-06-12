@@ -117,8 +117,19 @@ function statusClass(s) {
   return m[s] || 'disponible';
 }
 
+function formatPrecio(valor) {
+  if (!valor) return '—';
+  // Limpia cualquier símbolo y convierte a número
+  const num = parseFloat(String(valor).replace(/[^0-9.]/g, ''));
+  if (isNaN(num)) return valor; // Si no es número, regresa tal cual
+  return '$' + num.toLocaleString('es-MX', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
 function cardHTML(p, idx) {
-  const precio = p.operacion === 'Renta' ? p.precio_renta : p.precio_venta;
+  const precio = p.operacion === 'Renta' ? formatPrecio(p.precio_renta) : formatPrecio(p.precio_venta);
   const specs = [
     p.recamaras ? `<div class="spec-item"><span class="spec-val">${p.recamaras}</span><span class="spec-lbl">recámaras</span></div>` : '',
     p.banos ? `<div class="spec-item"><span class="spec-val">${p.banos}</span><span class="spec-lbl">baños</span></div>` : '',
@@ -177,6 +188,9 @@ function cardHTML(p, idx) {
       </div>
     </div>`;
 }
+
+
+
 
 function renderGrid(props) {
   const grid = document.getElementById('prop-grid');
