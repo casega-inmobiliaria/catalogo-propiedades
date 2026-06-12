@@ -17,9 +17,13 @@
       </div>
       <h2>Catálogo de propiedades</h2>
       <p class="subtitle">Acceso solo para asesores</p>
-      <input type="password" id="pass-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter') doLogin()" />
-      <button class="btn-primary" onclick="doLogin()">Entrar</button>
-      <p class="error-msg" id="login-error">Contraseña incorrecta. Intenta de nuevo.</p>
+      <input type="text" id="user-input" placeholder="Usuario" 
+      onkeydown="if(event.key==='Enter') document.getElementById('pass-input').focus()"/>
+
+    <input type="password" id="pass-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter') doLogin()"/>
+
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+          <p class="error-msg" id="login-error"> Usuario o contraseña incorrectos.</p>
     </div>
   </div>
 

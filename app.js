@@ -6,7 +6,10 @@ async function doLogin() {
 
   document.getElementById('login-error').style.display = 'none';
 
-  const val =
+  const usuario =
+    document.getElementById('user-input').value.trim();
+
+  const password =
     document.getElementById('pass-input').value;
 
   try {
@@ -17,20 +20,26 @@ async function doLogin() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        password: val
+        usuario,
+        password
       })
     });
 
     const json = await res.json();
 
     if (!json.success) {
+
+      document.getElementById('login-error').textContent =
+        json.message;
+
       document.getElementById('login-error').style.display =
         'block';
+
       return;
     }
 
-    sessionStorage.setItem("logged","true");
-    sessionStorage.setItem("catalog_pass", val);
+    sessionStorage.setItem("logged", "true");
+    sessionStorage.setItem("user", usuario);
 
     document.getElementById('login-screen').style.display =
       'none';
@@ -49,62 +58,19 @@ async function doLogin() {
 
   }
 }
-
 function doLogout() {
 
-  sessionStorage.removeItem("logged");
-  sessionStorage.removeItem("catalog_pass");
+  sessionStorage.clear();
 
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display =
+    'flex';
+
+  document.getElementById('app').style.display =
+    'none';
+
+  document.getElementById('user-input').value = '';
   document.getElementById('pass-input').value = '';
-  document.getElementById('login-error').style.display = 'none';
-}
 
-async function loadSheet() {
-
-  const pass = sessionStorage.getItem("catalog_pass");
-
-  if (!pass) {
-    doLogout();
-    return;
-  }
-
-  const grid = document.getElementById('prop-grid');
-
-  grid.innerHTML =
-    '<div class="loading-msg">Cargando propiedades...</div>';
-
-  try {
-
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        password: pass
-      })
-    });
-
-    const json = await res.json();
-
-    if (!json.success) {
-      throw new Error("Acceso denegado");
-    }
-
-    allProps = json.data;
-
-    populateZonas();
-    applyFilters();
-
-  } catch (err) {
-
-    grid.innerHTML =
-      '<div class="empty-state">No se pudo cargar la información.</div>';
-
-    console.error(err);
-  }
 }
 
 function populateZonas() {
@@ -252,13 +218,15 @@ window.addEventListener('load', () => {
 
   if (
     sessionStorage.getItem('logged') === 'true' &&
-    sessionStorage.getItem('catalog_pass')
+    sessionStorage.getItem('user')
   ) {
 
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    document.getElementById('login-screen').style.display =
+      'none';
 
-    loadSheet();
+    document.getElementById('app').style.display =
+      'block';
+
   }
 
 });
