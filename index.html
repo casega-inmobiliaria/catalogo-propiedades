@@ -17,13 +17,12 @@
       </div>
       <h2>Catálogo de propiedades</h2>
       <p class="subtitle">Acceso solo para asesores</p>
-      <input type="text" id="user-input" placeholder="Usuario" 
-      onkeydown="if(event.key==='Enter') document.getElementById('pass-input').focus()"/>
-
-    <input type="password" id="pass-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter') doLogin()"/>
-
-    <button class="btn-primary" onclick="doLogin()">Entrar</button>
-          <p class="error-msg" id="login-error"> Usuario o contraseña incorrectos.</p>
+      <input type="text" id="user-input" placeholder="Usuario"
+        onkeydown="if(event.key==='Enter') document.getElementById('pass-input').focus()"/>
+      <input type="password" id="pass-input" placeholder="Contraseña"
+        onkeydown="if(event.key==='Enter') doLogin()"/>
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+      <p class="error-msg" id="login-error">Usuario o contraseña incorrectos.</p>
     </div>
   </div>
 
@@ -77,6 +76,13 @@
         </select>
         <select id="f-precio" onchange="applyFilters()">
           <option value="">Precio</option>
+        </select>
+        <select id="f-vigencia" onchange="applyFilters()">
+          <option value="">Vigencia</option>
+          <option value="vencido">🔴 Vencidos</option>
+          <option value="critico">🟠 Críticos (menos de 15 días)</option>
+          <option value="proximo">🟡 Próximos a vencer (15–30 días)</option>
+          <option value="vigente">🟢 Vigentes (más de 30 días)</option>
         </select>
         <button class="btn-clear" onclick="clearFilters()">
           <i class="ti ti-filter-off"></i> Limpiar
