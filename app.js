@@ -126,7 +126,8 @@ function applyFilters() {
   const status = document.getElementById('f-status').value;
   const zona = document.getElementById('f-zona').value;
   const excl = document.getElementById('f-exclusiva').value;
-  const precioRango = document.getElementById('f-precio').value; // ✅ NUEVO
+  const precioRango = document.getElementById('f-precio').value;
+  const vigencia = document.getElementById('f-vigencia').value; // ✅ NUEVO
 
   const filtered = allProps.filter(p => {
     if (search && !JSON.stringify(p).toLowerCase().includes(search)) return false;
@@ -136,12 +137,26 @@ function applyFilters() {
     if (zona && p.zona !== zona) return false;
     if (excl && p.exclusiva !== excl) return false;
 
-    // ✅ NUEVO: filtro de precio
+    // filtro de precio
     if (precioRango) {
       const [min, max] = precioRango.split('-').map(Number);
       const valorPrecio = p.operacion === 'Renta' ? p.precio_renta : p.precio_venta;
       const numPrecio = parseFloat(String(valorPrecio).replace(/[^0-9.]/g, ''));
       if (isNaN(numPrecio) || numPrecio < min || numPrecio > max) return false;
+    }
+
+    // ✅ NUEVO: filtro de vigencia
+    if (vigencia) {
+      if (!p.fecha_vencimiento) return false;
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const venc = new Date(p.fecha_vencimiento);
+      if (isNaN(venc)) return false;
+      const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+      if (vigencia === 'vencido'  && dias >= 0) return false;
+      if (vigencia === 'critico'  && (dias < 0 || dias > 15)) return false;
+      if (vigencia === 'proximo'  && (dias < 0 || dias <= 15 || dias > 30)) return false;
+      if (vigencia === 'vigente'  && dias <= 30) return false;
     }
 
     return true;
@@ -160,7 +175,8 @@ function clearFilters() {
   document.getElementById('f-status').value = '';
   document.getElementById('f-zona').value = '';
   document.getElementById('f-exclusiva').value = '';
-  document.getElementById('f-precio').value = ''; // ✅ NUEVO
+  document.getElementById('f-precio').value = '';
+  document.getElementById('f-vigencia').value = ''; // ✅ NUEVO
 
   applyFilters();
 }
@@ -168,6 +184,33 @@ function clearFilters() {
 function statusClass(s) {
   const m = { 'Disponible': 'disponible', 'Apartada': 'apartada', 'Vendida': 'vendida', 'Rentada': 'rentada' };
   return m[s] || 'disponible';
+}
+
+// ✅ NUEVO: badge de vigencia del acuerdo
+function vigenciaBadge(fechaVenc) {
+  if (!fechaVenc) return '';
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const venc = new Date(fechaVenc);
+  if (isNaN(venc)) return '';
+  const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+
+  let estilo, texto;
+  if (dias < 0) {
+    estilo = 'background:#fee2e2;color:#991b1b;border-color:#fca5a5';
+    texto = 'Acuerdo vencido';
+  } else if (dias <= 15) {
+    estilo = 'background:#ffedd5;color:#9a3412;border-color:#fdba74';
+    texto = `Vence en ${dias} día${dias !== 1 ? 's' : ''}`;
+  } else if (dias <= 30) {
+    estilo = 'background:#fef9c3;color:#854d0e;border-color:#fde047';
+    texto = `Vence en ${dias} días`;
+  } else {
+    estilo = 'background:#dcfce7;color:#166534;border-color:#86efac';
+    texto = `Vence en ${dias} días`;
+  }
+
+  return `<span class="tag" style="${estilo}"><i class="ti ti-calendar-time"></i> ${texto}</span>`;
 }
 
 // ✅ Formatea precio con comas y decimales
@@ -200,6 +243,7 @@ function cardHTML(p, idx) {
     p.mant_costo ? `<span class="tag">Mant. ${p.mant_costo}</span>` : '',
     p.mant_incluido === 'Sí' ? `<span class="tag" style="color:#065f46;background:#d1fae5;border-color:#a7f3d0;">Mant. incluido</span>` : '',
     p.iva === 'Sí' ? `<span class="tag tag-iva">+ IVA</span>` : '',
+    vigenciaBadge(p.fecha_vencimiento), // ✅ NUEVO
   ].filter(Boolean).join('');
 
   const links = [
