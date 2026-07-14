@@ -131,7 +131,7 @@ function applyFilters() {
 
   const filtered = allProps.filter(p => {
     if (search && !JSON.stringify(p).toLowerCase().includes(search)) return false;
-    if (op && p.operacion !== op) return false;
+    if (op && p.operacion !== op && p.operacion !== 'Venta y Renta') return false;
     if (tipo && p.tipo !== tipo) return false;
     if (status && p.status !== status) return false;
     if (zona && p.zona !== zona) return false;
@@ -140,7 +140,13 @@ function applyFilters() {
     // filtro de precio
     if (precioRango) {
       const [min, max] = precioRango.split('-').map(Number);
-      const valorPrecio = p.operacion === 'Renta' ? p.precio_renta : p.precio_venta;
+      // Para "Venta y Renta", usar el precio según el filtro de operación activo
+      let valorPrecio;
+      if (p.operacion === 'Venta y Renta') {
+        valorPrecio = op === 'Renta' ? p.precio_renta : p.precio_venta;
+      } else {
+        valorPrecio = p.operacion === 'Renta' ? p.precio_renta : p.precio_venta;
+      }
       const numPrecio = parseFloat(String(valorPrecio).replace(/[^0-9.]/g, ''));
       if (isNaN(numPrecio) || numPrecio < min || numPrecio > max) return false;
     }
@@ -225,9 +231,13 @@ function formatPrecio(valor) {
 }
 
 function cardHTML(p, idx) {
-  const precio = p.operacion === 'Renta'
-    ? formatPrecio(p.precio_renta)
-    : formatPrecio(p.precio_venta);
+  const esAmbas = p.operacion === 'Venta y Renta';
+  const precioHTML = esAmbas
+    ? `<div class="prop-precio-doble">
+        <div class="precio-item"><span class="precio-label">Venta</span><span class="precio-val">${formatPrecio(p.precio_venta)}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</span></div>
+        <div class="precio-item"><span class="precio-label">Renta</span><span class="precio-val">${formatPrecio(p.precio_renta)}<small>/mes</small></span></div>
+      </div>`
+    : `<div class="prop-precio">${p.operacion === 'Renta' ? formatPrecio(p.precio_renta) : formatPrecio(p.precio_venta)}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</div>`;
 
   const specs = [
     p.recamaras ? `<div class="spec-item"><span class="spec-val">${p.recamaras}</span><span class="spec-lbl">recámaras</span></div>` : '',
@@ -268,7 +278,7 @@ function cardHTML(p, idx) {
         <span class="status-badge status-${statusClass(p.status)}">${p.status || ''}</span>
       </div>
       <div class="card-body">
-        <div class="prop-precio">${precio}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</div>
+        ${precioHTML}
         <div class="prop-tipo-row">
           <span class="tag tag-blue">${p.operacion || ''}</span>
           <span class="tag">${p.tipo || ''}</span>
