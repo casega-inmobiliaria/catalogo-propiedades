@@ -33,7 +33,6 @@ async function doLogin() {
 
     sessionStorage.setItem("logged", "true");
     sessionStorage.setItem("user", usuario);
-    // ✅ Ya no guardamos la password por seguridad
 
     document.getElementById('login-screen').style.display =
       'none';
@@ -79,7 +78,6 @@ function populateZonas() {
   });
 }
 
-// ✅ NUEVO: actualiza los rangos de precio según operación seleccionada
 function updateRangosPrecios() {
   const op = document.getElementById('f-operacion').value;
   const sel = document.getElementById('f-precio');
@@ -110,14 +108,12 @@ function updateRangosPrecios() {
     sel.appendChild(o);
   });
 
-  // Restaura selección si sigue siendo válida
   if ([...sel.options].some(o => o.value === valorActual)) {
     sel.value = valorActual;
   }
 }
 
 function applyFilters() {
-  // ✅ Actualiza rangos de precio antes de filtrar
   updateRangosPrecios();
 
   const search = document.getElementById('f-search').value.toLowerCase();
@@ -127,7 +123,7 @@ function applyFilters() {
   const zona = document.getElementById('f-zona').value;
   const excl = document.getElementById('f-exclusiva').value;
   const precioRango = document.getElementById('f-precio').value;
-  const vigencia = document.getElementById('f-vigencia').value; // ✅ NUEVO
+  const vigencia = document.getElementById('f-vigencia').value;
 
   const filtered = allProps.filter(p => {
     if (search && !JSON.stringify(p).toLowerCase().includes(search)) return false;
@@ -137,10 +133,8 @@ function applyFilters() {
     if (zona && p.zona !== zona) return false;
     if (excl && p.exclusiva !== excl) return false;
 
-    // filtro de precio
     if (precioRango) {
       const [min, max] = precioRango.split('-').map(Number);
-      // Para "Venta y Renta", usar el precio según el filtro de operación activo
       let valorPrecio;
       if (p.operacion === 'Venta y Renta') {
         valorPrecio = op === 'Renta' ? p.precio_renta : p.precio_venta;
@@ -151,7 +145,6 @@ function applyFilters() {
       if (isNaN(numPrecio) || numPrecio < min || numPrecio > max) return false;
     }
 
-    // ✅ NUEVO: filtro de vigencia
     if (vigencia) {
       if (!p.fecha_vencimiento) return false;
       const hoy = new Date();
@@ -174,7 +167,6 @@ function applyFilters() {
 }
 
 function clearFilters() {
-
   document.getElementById('f-search').value = '';
   document.getElementById('f-operacion').value = '';
   document.getElementById('f-tipo').value = '';
@@ -182,8 +174,7 @@ function clearFilters() {
   document.getElementById('f-zona').value = '';
   document.getElementById('f-exclusiva').value = '';
   document.getElementById('f-precio').value = '';
-  document.getElementById('f-vigencia').value = ''; // ✅ NUEVO
-
+  document.getElementById('f-vigencia').value = '';
   applyFilters();
 }
 
@@ -192,7 +183,6 @@ function statusClass(s) {
   return m[s] || 'disponible';
 }
 
-// ✅ NUEVO: badge de vigencia del acuerdo
 function vigenciaBadge(fechaVenc) {
   if (!fechaVenc) return '';
   const hoy = new Date();
@@ -219,7 +209,6 @@ function vigenciaBadge(fechaVenc) {
   return `<span class="tag" style="${estilo}"><i class="ti ti-calendar-time"></i> ${texto}</span>`;
 }
 
-// ✅ Formatea precio con comas y decimales
 function formatPrecio(valor) {
   if (!valor) return '—';
   const num = parseFloat(String(valor).replace(/[^0-9.]/g, ''));
@@ -232,10 +221,20 @@ function formatPrecio(valor) {
 
 function cardHTML(p, idx) {
   const esAmbas = p.operacion === 'Venta y Renta';
+
+  // 👇 LOG TEMPORAL — borra esta línea una vez que confirmes los valores
+  console.log(p.nombre, '→ operacion:', p.operacion, '| precio_venta:', p.precio_venta, '| precio_renta:', p.precio_renta);
+
   const precioHTML = esAmbas
     ? `<div class="prop-precio-doble">
-        <div class="precio-item"><span class="precio-label">Venta</span><span class="precio-val">${formatPrecio(p.precio_venta)}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</span></div>
-        <div class="precio-item"><span class="precio-label">Renta</span><span class="precio-val">${formatPrecio(p.precio_renta)}<small>/mes</small></span></div>
+        <div class="precio-item">
+          <span class="precio-label">Venta</span>
+          <span class="precio-val">${formatPrecio(p.precio_venta)}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</span>
+        </div>
+        <div class="precio-item">
+          <span class="precio-label">Renta</span>
+          <span class="precio-val">${formatPrecio(p.precio_renta)}<small>/mes</small></span>
+        </div>
       </div>`
     : `<div class="prop-precio">${p.operacion === 'Renta' ? formatPrecio(p.precio_renta) : formatPrecio(p.precio_venta)}${p.iva === 'Sí' ? '<small>+ IVA</small>' : ''}</div>`;
 
@@ -253,7 +252,7 @@ function cardHTML(p, idx) {
     p.mant_costo ? `<span class="tag">Mant. ${p.mant_costo}</span>` : '',
     p.mant_incluido === 'Sí' ? `<span class="tag" style="color:#065f46;background:#d1fae5;border-color:#a7f3d0;">Mant. incluido</span>` : '',
     p.iva === 'Sí' ? `<span class="tag tag-iva">+ IVA</span>` : '',
-    vigenciaBadge(p.fecha_vencimiento), // ✅ NUEVO
+    vigenciaBadge(p.fecha_vencimiento),
   ].filter(Boolean).join('');
 
   const links = [
