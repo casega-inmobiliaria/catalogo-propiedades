@@ -291,6 +291,7 @@ body {
   padding: 0.875rem 1rem;
 }
 
+/* Precio simple */
 .prop-precio {
   font-size: 20px;
   font-weight: 700;
@@ -303,6 +304,53 @@ body {
   color: var(--gris-texto);
   font-weight: 400;
   margin-left: 4px;
+}
+
+/* =========================================
+   PRECIO DOBLE (Venta y Renta)
+   ========================================= */
+.prop-precio-doble {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+  padding: 10px 12px;
+  background: var(--azul-claro);
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--gris-borde);
+}
+
+.precio-item {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.precio-item + .precio-item {
+  border-left: 1px solid var(--gris-borde);
+  padding-left: 12px;
+}
+
+.precio-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--gris-texto);
+  margin-bottom: 2px;
+}
+
+.precio-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--azul);
+  line-height: 1.2;
+}
+
+.precio-val small {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--gris-texto);
+  margin-left: 2px;
 }
 
 /* Tags de tipo / operación / exclusiva */
@@ -565,5 +613,13 @@ body {
 
   .filters-bar {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .prop-precio-doble {
+    gap: 8px;
+  }
+
+  .precio-val {
+    font-size: 14px;
   }
 }

@@ -222,9 +222,6 @@ function formatPrecio(valor) {
 function cardHTML(p, idx) {
   const esAmbas = p.operacion === 'Venta y Renta';
 
-  // 👇 LOG TEMPORAL — borra esta línea una vez que confirmes los valores
-  console.log(p.nombre, '→ operacion:', p.operacion, '| precio_venta:', p.precio_venta, '| precio_renta:', p.precio_renta);
-
   const precioHTML = esAmbas
     ? `<div class="prop-precio-doble">
         <div class="precio-item">
